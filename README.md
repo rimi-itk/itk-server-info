@@ -1,5 +1,15 @@
-# ITK server info – Server
+# ITK server info
+
+## Coding standards
+
+Install [`ShellCheck`](https://www.shellcheck.net/):
 
 ```sh
-git clone --branch=server https://github.com/rimi-itk/itk-server-info
+brew install shellcheck
+```
+
+Check the code:
+
+```sh
+shellcheck bin/*
 ```

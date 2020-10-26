@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -o errexit -o errtrace -o noclobber -o nounset -o pipefail
+IFS=$'\n\t'
+
+for f in /etc/{apache,nginx}*/sites-enabled/*; do
+	if [ -e "$f" ]; then
+		echo "--- $f"
+		grep --no-messages '^[[:space:]]*\(server_name\|root\|proxy_pass\|Server\(Name\|Alias\)\|DocumentRoot\|ProxyPass\)' "$f" |
+			# https://unix.stackexchange.com/a/205854
+			awk '{$1=$1};1'
+	fi
+done

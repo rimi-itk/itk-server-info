@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -o errexit -o errtrace -o noclobber -o nounset -o pipefail
+IFS=$'\n\t'
+
+for d in /data/www/*/htdocs; do
+	if [ -d "$d" ]; then
+		echo --- "$d";
+
+		if [ -e "$d/composer.json" ]; then
+				echo ------ "composer";
+				(cd "$d"; composer show --format=json)
+		fi
+	fi
+done
