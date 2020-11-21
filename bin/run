@@ -30,6 +30,6 @@ fi
 
 data_filename=$script_dir/data
 
-"$script_dir/server" >| "$data_filename"
+"$script_dir/server" >| "$data_filename" 2>&1
 
 curl --request PUT "$HUB_URL/server/$(hostname)" --data-binary "@$data_filename"
