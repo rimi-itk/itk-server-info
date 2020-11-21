@@ -1,4 +1,22 @@
-# ITK server info
+# ITK server info – Server
+
+```sh
+git clone --branch=server https://github.com/rimi-itk/itk-server-info
+```
+
+## Installation
+
+```sh
+cp .env .env.local
+```
+
+Edit `.env.local` as needed.
+
+## Running
+
+```sh
+bin/run
+```
 
 ## Coding standards
 
