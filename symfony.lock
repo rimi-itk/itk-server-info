@@ -131,6 +131,9 @@
     "gedmo/doctrine-extensions": {
         "version": "v3.0.0"
     },
+    "itk-dev/database-bundle": {
+        "version": "1.3.1"
+    },
     "laminas/laminas-code": {
         "version": "3.5.0"
     },

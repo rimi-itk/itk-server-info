@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Server;
+use App\Entity\Website;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -19,7 +20,7 @@ class DashboardController extends AbstractDashboardController
     {
         $routeBuilder = $this->get(CrudUrlGenerator::class)->build();
 
-        return $this->redirect($routeBuilder->setController(ServerCrudController::class)->generateUrl());
+        return $this->redirect($routeBuilder->setController(WebsiteCrudController::class)->generateUrl());
     }
 
     public function configureDashboard(): Dashboard
@@ -31,6 +32,7 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::linkToCrud('Servers', 'fa fa-tags', Server::class);
+        yield MenuItem::linkToCrud('Websites', 'fa fa-folder-open', Website::class);
+        yield MenuItem::linkToCrud('Servers', 'fa fa-folder-open', Server::class);
     }
 }

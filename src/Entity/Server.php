@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ServerRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 
@@ -33,6 +35,16 @@ class Server
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $processedAt;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Website::class, mappedBy="server", orphanRemoval=true)
+     */
+    private $websites;
+
+    public function __construct()
+    {
+        $this->websites = new ArrayCollection();
+    }
 
     public function getName(): ?string
     {
@@ -66,6 +78,36 @@ class Server
     public function setProcessedAt(?\DateTimeInterface $processedAt): self
     {
         $this->processedAt = $processedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Website[]
+     */
+    public function getWebsites(): Collection
+    {
+        return $this->websites;
+    }
+
+    public function addWebsite(Website $website): self
+    {
+        if (!$this->websites->contains($website)) {
+            $this->websites[] = $website;
+            $website->setServer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWebsite(Website $website): self
+    {
+        if ($this->websites->removeElement($website)) {
+            // set the owning side to null (unless already changed)
+            if ($website->getServer() === $this) {
+                $website->setServer(null);
+            }
+        }
 
         return $this;
     }
