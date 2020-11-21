@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -o errexit -o errtrace -o noclobber -o nounset -o pipefail
+IFS=$'\n\t'
+
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+config_dir=$(cd "$(dirname "$script_dir")" && pwd)
+config_filename="$config_dir/.env.local"
+
+if ! command -v curl &> /dev/null; then
+	(>&2 echo "Cannot run curl")
+	exit 1
+fi
+
+if [ ! -e "$config_filename" ]; then
+	(>&2 echo "Config file $config_filename not found")
+	exit 1
+fi
+
+source "$config_filename"
+
+if [ -z "${HUB_URL:-}" ]; then
+	(>&2 echo "HUB_URL not defined")
+	exit 1
+fi
+
+if [ -z "${HUB_API_TOKEN:-}" ]; then
+	(>&2 echo "HUB_API_TOKEN not defined")
+	exit 1
+fi
+
+data_filename=$script_dir/data
+
+"$script_dir/server" >| "$data_filename"
+
+curl --request PUT "$HUB_URL/server/$(hostname)" --data-binary "@$data_filename"
