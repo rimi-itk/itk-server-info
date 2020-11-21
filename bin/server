@@ -1,12 +1,157 @@
 #!/usr/bin/env bash
-set -o errexit -o errtrace -o noclobber -o nounset -o pipefail
+# set -o errexit -o errtrace -o noclobber -o nounset -o pipefail
+set -o errtrace -o noclobber -o nounset -o pipefail
 IFS=$'\n\t'
 
+section_names=()
+
+# @see https://stackoverflow.com/a/23673883
+join() {
+    # $1 is return variable name
+    # $2 is sep
+    # $3... are the elements to join
+    local retname=$1 sep=$2 ret=$3
+    shift 3 || shift $(($#))
+    printf -v "$retname" "%s" "$ret${@/#/$sep}"
+}
+
+print_section() {
+	type=$1
+	join path ":" "${section_names[@]}"
+	for _ in "${section_names[@]}"; do
+		printf -- '---'
+	done
+	printf " %s %s\n" "$path" "$type"
+}
+
+start_section() {
+	# @see https://unix.stackexchange.com/a/395103
+	if [ -z "${section_names+x}" ]; then
+		section_names=("$1")
+	else
+		section_names=("${section_names[@]}" "$1")
+	fi
+	print_section "start"
+}
+
+end_section() {
+	print_section "end"
+
+	# @see https://stackoverflow.com/a/8247497
+	unset section_names[${#section_names[@]}-1]
+}
+
+if command -v nginx &> /dev/null; then
+		start_section "nginx"
+		nginx -v
+		end_section
+fi
+
+if command -v apache2 &> /dev/null; then
+		start_section "apache2"
+		apache2 -v
+		end_section
+fi
+
+if command -v mysql &> /dev/null; then
+		start_section "mysql"
+		mysql --version
+		end_section
+fi
+
+if command -v node &> /dev/null; then
+		start_section "node"
+		node -v
+		end_section
+fi
+
+if command -v php &> /dev/null; then
+		start_section "php"
+		php -v
+		start_section "modules"
+		php -m
+		end_section
+		end_section
+fi
+
+start_section "virtual hosts"
 for f in /etc/{apache,nginx}*/sites-enabled/*; do
-	if [ -e "$f" ]; then
-		echo "--- $f"
-		grep --no-messages '^[[:space:]]*\(server_name\|root\|proxy_pass\|Server\(Name\|Alias\)\|DocumentRoot\|ProxyPass\)' "$f" |
-			# https://unix.stackexchange.com/a/205854
-			awk '{$1=$1};1'
+				if [ -f "$f" ]; then
+					start_section "site vhost $f"
+					grep --no-messages '^[[:space:]]*\(server_name\|root\|proxy_pass\|Server\(Name\|Alias\)\|DocumentRoot\|ProxyPass\)' "$f" |
+						# https://unix.stackexchange.com/a/205854
+						awk '{$1=$1};1'
+					end_section
+				fi
+done
+end_section
+
+start_section "sites"
+
+# # Composer
+# if command -v composer &> /dev/null; then
+#		for f in /data/www/*/htdocs/composer.json; do
+#			if [ -f "$f" ]; then
+#				document_root=$(dirname "$f")
+#				start_section "composer $document_root"
+#				composer --working-dir="$document_root" show --format=json
+#				end_section
+#			fi
+#		done
+# fi
+
+# Drupal sites in sub-folder
+for f in /data/www/*/htdocs/*/sites/*/settings.php; do
+	if [ -f "$f" ]; then
+		site_dir=$(dirname "$f")
+		document_root=$(dirname "$(dirname "$(dirname "$site_dir")")")
+		start_section "drupal $document_root"
+		drush=''
+		if [ -f "$document_root/vendor/bin/drush" ]; then
+			drush="$document_root/vendor/bin/drush"
+		elif command -v drush &> /dev/null; then
+			drush="drush"
+		fi
+		if [ -n "$drush" ]; then
+			"$drush" --root="$site_dir" status --format=json
+			start_section "modules"
+			"$drush" --root="$site_dir" pm-list --format=json
+			end_section
+		fi
+		end_section
 	fi
 done
+
+# Drupal sites
+for f in /data/www/*/htdocs/sites/*/settings.php; do
+	if [ -f "$f" ]; then
+		site_dir=$(dirname "$f")
+		document_root=$(dirname "$(dirname "$site_dir")")
+		start_section "drupal $document_root"
+		drush=''
+		if [ -f "$document_root/vendor/bin/drush" ]; then
+			drush="$document_root/vendor/bin/drush"
+		elif command -v drush &> /dev/null; then
+			drush="drush"
+		fi
+		if [ -n "$drush" ]; then
+			"$drush" --root="$site_dir" status --format=json
+			start_section "modules"
+			"$drush" --root="$site_dir" pm-list --format=json
+			end_section
+		fi
+		end_section
+	fi
+done
+
+# Symfony
+for f in /data/www/*/htdocs/*/console; do
+	if [ -f "$f" ]; then
+		document_root=$(dirname "$(dirname "$f")")
+		start_section "symfony $document_root"
+		"$f" --version
+		end_section
+	fi
+done
+
+end_section
