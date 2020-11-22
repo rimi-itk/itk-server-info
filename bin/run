@@ -16,6 +16,7 @@ if [ ! -e "$config_filename" ]; then
 	exit 1
 fi
 
+# shellcheck disable=SC1090
 source "$config_filename"
 
 if [ -z "${HUB_URL:-}" ]; then
@@ -28,7 +29,7 @@ if [ -z "${HUB_API_TOKEN:-}" ]; then
 	exit 1
 fi
 
-data_filename=$script_dir/data
+data_filename=$script_dir/../.data
 
 "$script_dir/server" >| "$data_filename" 2>&1
 
