@@ -3,8 +3,8 @@ set -o errexit -o errtrace -o noclobber -o nounset -o pipefail
 IFS=$'\n\t'
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-config_dir=$(cd "$(dirname "$script_dir")" && pwd)
-config_filename="$config_dir/.env.local"
+project_dir=$(cd "$(dirname "$script_dir")" && pwd)
+config_filename="$project_dir/.env.local"
 
 if ! command -v curl &> /dev/null; then
 	(>&2 echo "Cannot run curl")
@@ -24,13 +24,14 @@ if [ -z "${HUB_URL:-}" ]; then
 	exit 1
 fi
 
-if [ -z "${HUB_API_TOKEN:-}" ]; then
-	(>&2 echo "HUB_API_TOKEN not defined")
+if [ -z "${HUB_API_PASSWORD:-}" ]; then
+	(>&2 echo "HUB_API_PASSWORD not defined")
 	exit 1
 fi
 
-data_filename=$script_dir/../.data
+data_filename=$project_dir/var/data
+log_filename=$project_dir/var/run.log
 
 "$script_dir/server" >| "$data_filename" 2>&1
 
-curl --request PUT "$HUB_URL/server/$(hostname)" --data-binary "@$data_filename"
+curl --user "api:$HUB_API_PASSWORD" --request PUT "$HUB_URL/server/$(hostname)" --data-binary "@$data_filename" --verbose >| "$log_filename" 2>&1
