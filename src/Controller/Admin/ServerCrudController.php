@@ -26,6 +26,9 @@ class ServerCrudController extends AbstractCrudController
             DateTimeField::new('createdAt'),
             DateTimeField::new('updatedAt'),
             DateTimeField::new('processedAt'),
+            TextField::new('data')
+                ->onlyOnDetail()
+                ->setTemplatePath('admin/server/data.html.twig'),
         ];
     }
 
