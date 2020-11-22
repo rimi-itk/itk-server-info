@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helper;
+namespace App\Util;
 
 use App\Entity\Server;
 use App\Repository\ServerRepository;
@@ -19,9 +19,13 @@ class ServerHelper
     /** @var EntityManagerInterface */
     private $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    /** @var DataParser */
+    private $dataHelper;
+
+    public function __construct(EntityManagerInterface $entityManager, DataParser $dataHelper)
     {
         $this->entityManager = $entityManager;
+        $this->dataHelper = $dataHelper;
     }
 
     public function process(array $serverNames)

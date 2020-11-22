@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Helper\ServerHelper;
+use App\Util\ServerHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

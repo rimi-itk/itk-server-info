@@ -1,0 +1,4 @@
+--- vhost file="/etc/apache2/sites-enabled/test.conf" type="apache" start
+ServerName test.example.com
+DocumentRoot /data/www/example/htdocs/
+--- vhost end
