@@ -19,7 +19,11 @@ start_section() {
   else
     section_names=("$1" "${section_names[@]}")
   fi
-  print_section "${@:2}" "start"
+  if [ $# -gt 1 ]; then
+    print_section "${@:2} start"
+  else
+    print_section "start"
+  fi
 }
 
 end_section() {
