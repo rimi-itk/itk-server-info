@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Admin\Field\JsonField;
 use App\Entity\Server;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -23,8 +24,9 @@ class ServerCrudController extends AbstractCrudController
         return [
             TextField::new('name'),
             AssociationField::new('websites'),
-            TextField::new('data')
-                ->onlyOnDetail(),
+            JsonField::new('data')
+                ->setSortable(false)
+                ->setTemplatePath('admin/server/data.html.twig'),
             DateTimeField::new('createdAt'),
             DateTimeField::new('updatedAt'),
             DateTimeField::new('processedAt'),

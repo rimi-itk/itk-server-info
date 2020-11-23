@@ -6,6 +6,7 @@ use App\Entity\Server;
 use App\Exception\InvalidDataException;
 use App\Repository\ServerRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerTrait;
 
@@ -42,7 +43,13 @@ class ServerHelper
 
         $servers = $queryBuilder->getQuery()->execute();
         foreach ($servers as $server) {
-            $this->processServer($server);
+            try {
+                $this->processServer($server);
+                $this->entityManager->persist($server);
+                $this->entityManager->flush();
+            } catch (Exception $exception) {
+                $this->error($exception->getMessage());
+            }
         }
     }
 
@@ -53,7 +60,8 @@ class ServerHelper
         }
     }
 
-    private function processServer(Server $server) {
+    private function processServer(Server $server)
+    {
         $this->info(sprintf('Processing server %s', $server->getName()));
         try {
             $data = $this->dataHelper->parseData($server->getRawData());
