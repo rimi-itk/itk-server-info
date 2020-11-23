@@ -7,26 +7,26 @@ project_dir=$(cd "$(dirname "$script_dir")" && pwd)
 config_filename="$project_dir/.env.local"
 
 if ! command -v curl &> /dev/null; then
-	(>&2 echo "Cannot run curl")
-	exit 1
+  (>&2 echo "Cannot run curl")
+  exit 1
 fi
 
 if [ ! -e "$config_filename" ]; then
-	(>&2 echo "Config file $config_filename not found")
-	exit 1
+  (>&2 echo "Config file $config_filename not found")
+  exit 1
 fi
 
 # shellcheck disable=SC1090
 source "$config_filename"
 
 if [ -z "${HUB_URL:-}" ]; then
-	(>&2 echo "HUB_URL not defined")
-	exit 1
+  (>&2 echo "HUB_URL not defined")
+  exit 1
 fi
 
 if [ -z "${HUB_API_PASSWORD:-}" ]; then
-	(>&2 echo "HUB_API_PASSWORD not defined")
-	exit 1
+  (>&2 echo "HUB_API_PASSWORD not defined")
+  exit 1
 fi
 
 data_filename=$project_dir/var/data

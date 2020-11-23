@@ -6,71 +6,71 @@ IFS=$'\n\t'
 section_names=()
 
 print_section() {
-	for _ in "${section_names[@]}"; do
-		printf -- '---'
-	done
-	printf " %s %s\n" "${section_names[0]}" "${@}"
+  for _ in "${section_names[@]}"; do
+    printf -- '---'
+  done
+  printf " %s %s\n" "${section_names[0]}" "${@}"
 }
 
 start_section() {
-	# @see https://unix.stackexchange.com/a/395103
-	if [ -z "${section_names+x}" ]; then
-		section_names=("$1")
-	else
-		section_names=("$1" "${section_names[@]}")
-	fi
-	print_section "${@:2}" "start"
+  # @see https://unix.stackexchange.com/a/395103
+  if [ -z "${section_names+x}" ]; then
+    section_names=("$1")
+  else
+    section_names=("$1" "${section_names[@]}")
+  fi
+  print_section "${@:2}" "start"
 }
 
 end_section() {
-	print_section "end"
+  print_section "end"
 
-	# @see https://stackoverflow.com/a/8247497
-	section_names=("${section_names[@]:1}")
+  # @see https://stackoverflow.com/a/8247497
+  section_names=("${section_names[@]:1}")
 }
 
 if command -v nginx &> /dev/null; then
-		start_section "nginx"
-		nginx -v
-		end_section
+  start_section "nginx"
+  nginx -v
+  end_section
 fi
 
 if command -v apache2 &> /dev/null; then
-		start_section "apache2"
-		apache2 -v
-		end_section
+  start_section "apache2"
+  apache2 -v
+  end_section
 fi
 
 if command -v mysql &> /dev/null; then
-		start_section "mysql"
-		mysql --version
-		end_section
+  start_section "mysql"
+  mysql --version
+  end_section
 fi
 
 if command -v node &> /dev/null; then
-		start_section "node"
-		node -v
-		end_section
+  start_section "node"
+  node -v
+  end_section
 fi
 
 if command -v php &> /dev/null; then
-		start_section "php"
-		php -v
-		start_section "modules"
-		php -m
-		end_section
-		end_section
+  start_section "php"
+  php -v
+  start_section "modules"
+  php -m
+  end_section
+  end_section
 fi
 
 start_section "virtual-hosts"
 for f in /etc/{apache,nginx}*/sites-enabled/*; do
-				if [ -f "$f" ]; then
-					start_section vhost 'file="'"$f"'"'
-					grep --no-messages '^[[:space:]]*\(server_name\|root\|proxy_pass\|Server\(Name\|Alias\)\|DocumentRoot\|ProxyPass\)' "$f" |
-						# https://unix.stackexchange.com/a/205854
-						awk '{$1=$1};1'
-					end_section
-				fi
+  if [ -f "$f" ]; then
+    start_section vhost 'file="'"$f"'"'
+    grep --no-messages '^[[:space:]]*\(server_name\|root\|proxy_pass\|Server\(Name\|Alias\)\|DocumentRoot\|ProxyPass\)' "$f" |
+      # https://unix.stackexchange.com/a/205854
+      awk '{$1=$1};1'
+    end_section
+  fi
 done
 end_section
 
@@ -78,50 +78,50 @@ start_section "sites"
 
 # Composer
 if command -v composer &> /dev/null; then
-		for f in /data/www/*/htdocs/composer.json; do
-			if [ -f "$f" ]; then
-				document_root=$(dirname "$f")
-				start_section "composer" 'document_root="'"$document_root"'"'
-				composer --working-dir="$document_root" show --format=json
-				end_section
-			fi
-		done
+  for f in /data/www/*/htdocs/composer.json; do
+    if [ -f "$f" ]; then
+      document_root=$(dirname "$f")
+      start_section "composer" 'document_root="'"$document_root"'"'
+      composer --working-dir="$document_root" show --format=json
+      end_section
+    fi
+  done
 fi
 
 # Drupal sites in sub-folder
 for f in /data/www/*/htdocs/*/sites/*/settings.php /data/www/*/htdocs/sites/*/settings.php; do
-	if [ -f "$f" ]; then
-		site_dir=$(dirname "$f")
-		document_root=$(dirname "$(dirname "$site_dir")")
-		if ! [[ "$f" =~ htdocs/sites ]]; then
-			# We're in a sub-folder (to htdocs) and have to step out one more time.
-			document_root=$(dirname "$document_root")
-		fi
-		start_section "drupal" 'document_root="'"$document_root"'"'
-		drush=''
-		if [ -f "$document_root/vendor/bin/drush" ]; then
-			drush="$document_root/vendor/bin/drush"
-		elif command -v drush &> /dev/null; then
-			drush="drush"
-		fi
-		if [ -n "$drush" ]; then
-			"$drush" --root="$site_dir" status --format=json
-			start_section "modules"
-			"$drush" --root="$site_dir" pm-list --format=json
-			end_section
-		fi
-		end_section
-	fi
+  if [ -f "$f" ]; then
+    site_dir=$(dirname "$f")
+    document_root=$(dirname "$(dirname "$site_dir")")
+    if ! [[ "$f" =~ htdocs/sites ]]; then
+      # We're in a sub-folder (to htdocs) and have to step out one more time.
+      document_root=$(dirname "$document_root")
+    fi
+    start_section "drupal" 'document_root="'"$document_root"'"'
+    drush=''
+    if [ -f "$document_root/vendor/bin/drush" ]; then
+      drush="$document_root/vendor/bin/drush"
+    elif command -v drush &> /dev/null; then
+      drush="drush"
+    fi
+    if [ -n "$drush" ]; then
+      "$drush" --root="$site_dir" status --format=json
+      start_section "modules"
+      "$drush" --root="$site_dir" pm-list --format=json
+      end_section
+    fi
+    end_section
+  fi
 done
 
 # Symfony
 for f in /data/www/*/htdocs/*/console; do
-	if [ -f "$f" ]; then
-		document_root=$(dirname "$(dirname "$f")")
-		start_section "symfony" 'document_root="'"$document_root"'"'
-		"$f" --version
-		end_section
-	fi
+  if [ -f "$f" ]; then
+    document_root=$(dirname "$(dirname "$f")")
+    start_section "symfony" 'document_root="'"$document_root"'"'
+    "$f" --version
+    end_section
+  fi
 done
 
 end_section
