@@ -4,95 +4,147 @@ set -o errtrace -o noclobber -o nounset -o pipefail
 IFS=$'\n\t'
 
 section_names=()
-
-print_section() {
-  for _ in "${section_names[@]}"; do
-    printf -- '---'
-  done
-  printf " %s %s\n" "${section_names[0]}" "${@}"
-}
+declare -A section_attributes=()
 
 start_section() {
-  # @see https://unix.stackexchange.com/a/395103
   if [ -z "${section_names+x}" ]; then
     section_names=("$1")
   else
     section_names=("$1" "${section_names[@]}")
   fi
-  if [ $# -gt 1 ]; then
-    print_section "${@:2} start"
-  else
-    print_section "start"
-  fi
+
+  printf "<%s" "${section_names[0]}"
+  for name in "${!section_attributes[@]}"; do
+    printf " %s=\"%s\"" "$name" "${section_attributes[$name]}"
+  done
+  printf ">"
+  section_attributes=()
 }
 
 end_section() {
-  print_section "end"
+  printf "\n</%s>\n" "${section_names[0]}"
 
   # @see https://stackoverflow.com/a/8247497
   section_names=("${section_names[@]:1}")
 }
 
+element_name=''
+declare -A element_attributes=()
+
+start_element() {
+  element_name=$1
+
+  printf "<%s" "$element_name"
+  for name in "${!element_attributes[@]}"; do
+    printf " %s=\"%s\"" "$name" "${element_attributes[$name]}"
+  done
+  printf "><![CDATA["
+  element_attributes=()
+}
+
+end_element() {
+  printf "]]></%s>\n" "$element_name"
+}
+
+start_section "server"
+
 if command -v nginx &> /dev/null; then
   start_section "nginx"
+
+  start_element "version"
   nginx -v
+  end_element
+
   end_section
 fi
 
 if command -v apache2 &> /dev/null; then
   start_section "apache2"
+
+  start_element "version"
   apache2 -v
+  end_element
+
   end_section
 fi
 
 if command -v mysql &> /dev/null; then
   start_section "mysql"
+
+  start_element "version"
   mysql --version
+  end_element
+
   end_section
 fi
 
 if command -v node &> /dev/null; then
   start_section "node"
+
+  start_element "version"
   node -v
+  end_element
+
   end_section
 fi
 
 if command -v php &> /dev/null; then
   start_section "php"
+
+  start_element "version"
   php -v
-  start_section "modules"
+  end_element
+
+  start_element "modules"
   php -m
+  end_element
+
   end_section
+fi
+
+if command -v php &> /dev/null; then
+  start_section "composer"
+
+  start_element "version"
+  composer --version
+  end_element
+
   end_section
 fi
 
 start_section "virtual-hosts"
+
 for f in /etc/{apache,nginx}*/sites-enabled/*; do
   if [ -f "$f" ]; then
-    start_section vhost 'file="'"$f"'"'
+
+    element_attributes=([file]="$f")
+    start_element "vhost"
     grep --no-messages '^[[:space:]]*\(server_name\|root\|proxy_pass\|Server\(Name\|Alias\)\|DocumentRoot\|ProxyPass\)' "$f" |
       # https://unix.stackexchange.com/a/205854
       awk '{$1=$1};1'
-    end_section
+    end_element
+
   fi
 done
+
 end_section
 
 start_section "sites"
 
-# Composer
-if command -v composer &> /dev/null; then
-  for f in /data/www/*/htdocs/composer.json; do
-    if [ -f "$f" ]; then
-      document_root=$(dirname "$f")
-      start_section "composer" 'document_root="'"$document_root"'"'
-      composer --working-dir="$document_root" show --format=json
-      end_section
-    fi
-  done
-fi
+# # Composer
+# if command -v composer &> /dev/null; then
+#   for f in /data/www/*/htdocs/composer.json; do
+#     if [ -f "$f" ]; then
+#       document_root=$(dirname "$f")
+#       element_attributes=([document-root]="$document_root" [format]="json")
+#       start_element "composer"
+#       composer --working-dir="$document_root" show --format=json
+#       end_element
+#     fi
+#   done
+# fi
 
-# Drupal sites in sub-folder
+# Drupal sites
 for f in /data/www/*/htdocs/*/sites/*/settings.php /data/www/*/htdocs/sites/*/settings.php; do
   if [ -f "$f" ]; then
     site_dir=$(dirname "$f")
@@ -101,19 +153,40 @@ for f in /data/www/*/htdocs/*/sites/*/settings.php /data/www/*/htdocs/sites/*/se
       # We're in a sub-folder (to htdocs) and have to step out one more time.
       document_root=$(dirname "$document_root")
     fi
-    start_section "drupal" 'document_root="'"$document_root"'"'
+    # element_attributes=([document-root]="$document_root")
+
+    start_section "drupal"
+
     drush=''
     if [ -f "$document_root/vendor/bin/drush" ]; then
       drush="$document_root/vendor/bin/drush"
     elif command -v drush &> /dev/null; then
       drush="drush"
     fi
+
     if [ -n "$drush" ]; then
+
+      element_attributes=([format]="json")
+      start_element "drush-status"
       "$drush" --root="$site_dir" status --format=json
-      start_section "modules"
+      end_element
+
+      element_attributes=([format]="json")
+      start_element "drush-modules"
       "$drush" --root="$site_dir" pm-list --format=json
-      end_section
+      end_element
+
     fi
+
+    if [ -e "$document_root/composer.json" ]; then
+
+       element_attributes=([document-root]="$document_root" [format]="json")
+       start_element "composer-show"
+       composer --working-dir="$document_root" show --format=json
+       end_element
+
+    fi
+
     end_section
   fi
 done
@@ -122,10 +195,24 @@ done
 for f in /data/www/*/htdocs/*/console; do
   if [ -f "$f" ]; then
     document_root=$(dirname "$(dirname "$f")")
-    start_section "symfony" 'document_root="'"$document_root"'"'
+
+    start_section "symfony"
+
+    element_attributes=([document-root]="$document_root")
+    start_element "version"
     "$f" --version
+    end_element
+
+    element_attributes=([document-root]="$document_root" [format]="json")
+    start_element "composer-show"
+    composer --working-dir="$document_root" show --format=json
+    end_element
+
     end_section
+
   fi
 done
+
+end_section
 
 end_section
