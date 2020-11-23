@@ -16,7 +16,7 @@ class DataParser
         $data = [];
         [$value, $blocks] = $this->getBlocks($payload, $level);
         if (null !== $value) {
-            $data['@value'] = trim($value).PHP_EOL;
+            $data['@text'] = trim($value).PHP_EOL;
         }
         foreach ($blocks as [$start, $content, $end]) {
             $start = $this->getMetadata($start);
@@ -44,7 +44,7 @@ class DataParser
     private function getBlocks(string $data, int $level = 0, string $delimiter = '---'): array
     {
         $chunks = preg_split(
-            '/^'.preg_quote(str_repeat($delimiter, $level + 1), '/').'\s(?P<metadata>.+)$/m',
+            '/^'.preg_quote(str_repeat($delimiter, $level + 1), '/').'\s(?P<metadata>.+)$[\n]?/m',
             rtrim($data),
             -1,
             PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE
@@ -68,7 +68,7 @@ class DataParser
     private function getMetadata(string $line)
     {
         if (preg_match(
-            '/^(?P<name>[^\s]+)(?P<attributes>(\s+(?P<key>[a-z]+)\s*=\s*"(?P<value>[^"]*)")*)\s+(?P<type>start|end)$/i',
+            '/^(?P<name>[^\s]+)(?P<attributes>(\s+(?P<key>[^\s=]+)\s*=\s*"(?P<value>[^"]*)")*)\s+(?P<type>start|end)$/i',
             $line,
             $matches,
             PREG_UNMATCHED_AS_NULL

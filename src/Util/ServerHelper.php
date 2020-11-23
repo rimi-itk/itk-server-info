@@ -3,6 +3,7 @@
 namespace App\Util;
 
 use App\Entity\Server;
+use App\Exception\InvalidDataException;
 use App\Repository\ServerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -41,7 +42,7 @@ class ServerHelper
 
         $servers = $queryBuilder->getQuery()->execute();
         foreach ($servers as $server) {
-            $this->info(sprintf('Processing server %s', $server->getName()));
+            $this->processServer($server);
         }
     }
 
@@ -49,6 +50,16 @@ class ServerHelper
     {
         if (null !== $this->logger) {
             $this->logger->log($level, $message, $context);
+        }
+    }
+
+    private function processServer(Server $server) {
+        $this->info(sprintf('Processing server %s', $server->getName()));
+        try {
+            $data = $this->dataHelper->parseData($server->getRawData());
+            var_export($data);
+        } catch (InvalidDataException $exception) {
+            $this->error($exception->getMessage());
         }
     }
 }
