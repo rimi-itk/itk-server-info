@@ -26,8 +26,7 @@ class ServerController extends AbstractController
         }
         $server
             ->setName($name)
-            ->setData((string) $request->getContent())
-            ->setProcessedAt(null);
+            ->setRawData((string) $request->getContent());
         $entityManager->persist($server);
         $entityManager->flush();
 

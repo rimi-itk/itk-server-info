@@ -13,7 +13,8 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
  * @ORM\Entity(repositoryClass=ServerRepository::class)
  * @ApiResource(
  *     collectionOperations={"get"},
- *     itemOperations={"get"}
+ *     itemOperations={"get"},
+ *     normalizationContext={"groups"={"read"}}
  * )
  */
 class Server
@@ -29,7 +30,7 @@ class Server
     /**
      * @ORM\Column(type="text")
      */
-    private $data;
+    private $rawData;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -37,9 +38,19 @@ class Server
     private $processedAt;
 
     /**
+     * @ORM\Column(type="json")
+     */
+    private $data = [];
+
+    /**
      * @ORM\OneToMany(targetEntity=Website::class, mappedBy="server", orphanRemoval=true)
      */
     private $websites;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $search;
 
     public function __construct()
     {
@@ -58,14 +69,15 @@ class Server
         return $this;
     }
 
-    public function getData(): ?string
+    public function getRawData(): ?string
     {
-        return $this->data;
+        return $this->rawData;
     }
 
-    public function setData(string $data): self
+    public function setRawData(string $rawData): self
     {
-        $this->data = $data;
+        $this->rawData = $rawData;
+        $this->processedAt = null;
 
         return $this;
     }
@@ -108,6 +120,30 @@ class Server
                 $website->setServer(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSearch(): ?string
+    {
+        return $this->search;
+    }
+
+    public function setSearch(?string $search): self
+    {
+        $this->search = $search;
+
+        return $this;
+    }
+
+    public function getData(): ?array
+    {
+        return $this->data;
+    }
+
+    public function setData(?array $data): self
+    {
+        $this->data = $data;
 
         return $this;
     }

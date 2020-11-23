@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Audience;
 use App\Entity\Server;
 use App\Entity\Website;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -36,6 +37,16 @@ class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToCrud('Websites', 'fa fa-folder-open', Website::class);
         yield MenuItem::linkToCrud('Servers', 'fa fa-folder-open', Server::class);
+
+        yield MenuItem::section('Misc');
+        yield MenuItem::linkToCrud('Audience', 'fa fa-folder-open', Audience::class);
+
+        yield MenuItem::section('Export');
+        yield MenuItem::linktoRoute('Website (CSV)', 'fa fa-folder-open', 'api_websites_get_collection', [
+            '_format' => 'csv',
+            'pagination' => false,
+            'enabled' => true,
+        ]);
     }
 
     public function configureUserMenu(UserInterface $user): UserMenu

@@ -23,12 +23,14 @@ class ServerCrudController extends AbstractCrudController
         return [
             TextField::new('name'),
             AssociationField::new('websites'),
+            TextField::new('data')
+                ->onlyOnDetail(),
             DateTimeField::new('createdAt'),
             DateTimeField::new('updatedAt'),
             DateTimeField::new('processedAt'),
-            TextField::new('data')
+            TextField::new('rawData')
                 ->onlyOnDetail()
-                ->setTemplatePath('admin/server/data.html.twig'),
+                ->setTemplatePath('admin/server/rawData.html.twig'),
         ];
     }
 
@@ -36,6 +38,6 @@ class ServerCrudController extends AbstractCrudController
     {
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->disable(Action::NEW, Action::DELETE, Action::EDIT);
+            ->disable(Action::NEW, Action::EDIT);
     }
 }
