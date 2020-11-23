@@ -6,11 +6,10 @@ IFS=$'\n\t'
 section_names=()
 
 print_section() {
-	type=$1
 	for _ in "${section_names[@]}"; do
 		printf -- '---'
 	done
-	printf " %s %s\n" "${section_names[0]}" "$type"
+	printf " %s %s\n" "${section_names[0]}" "${@}"
 }
 
 start_section() {
