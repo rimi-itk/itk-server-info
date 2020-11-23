@@ -62,7 +62,7 @@ if command -v php &> /dev/null; then
 		end_section
 fi
 
-start_section "virtual hosts"
+start_section "virtual-hosts"
 for f in /etc/{apache,nginx}*/sites-enabled/*; do
 				if [ -f "$f" ]; then
 					start_section vhost 'file="'"$f"'"'
