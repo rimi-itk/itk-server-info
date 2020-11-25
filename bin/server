@@ -168,12 +168,12 @@ for f in /data/www/*/htdocs/*/sites/*/settings.php /data/www/*/htdocs/sites/*/se
 
     if [ -n "$drush" ]; then
 
-      element_attributes=([format]="json")
+      element_attributes=([document-root]="$document_root" [format]="json")
       start_element "drush-status"
       "$drush" --root="$site_dir" status --format=json
       end_element
 
-      element_attributes=([format]="json")
+      element_attributes=([document-root]="$document_root" [format]="json")
       start_element "drush-modules"
       "$drush" --root="$site_dir" pm-list --format=json
       end_element
@@ -182,10 +182,10 @@ for f in /data/www/*/htdocs/*/sites/*/settings.php /data/www/*/htdocs/sites/*/se
 
     if [ -e "$document_root/composer.json" ]; then
 
-       element_attributes=([document-root]="$document_root" [format]="json")
-       start_element "composer-show"
-       composer --working-dir="$document_root" show --format=json
-       end_element
+      element_attributes=([document-root]="$document_root" [format]="json")
+      start_element "composer-show"
+      composer --working-dir="$document_root" show --format=json
+      end_element
 
     fi
 
