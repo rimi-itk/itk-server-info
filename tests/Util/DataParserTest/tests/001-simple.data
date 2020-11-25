@@ -1,3 +1,5 @@
---- php start
-PHP
---- php end
+<server>
+<php>
+<version><![CDATA[PHP
+]]></version></php>
+</server>

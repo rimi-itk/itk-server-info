@@ -6,6 +6,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",
+        "ext-simplexml": "*",
         "api-platform/core": "^2.5",
         "composer/package-versions-deprecated": "1.11.99.1",
         "doctrine/annotations": "^1.0",
@@ -74,7 +75,7 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
-				"coding-standards-check/php-cs-fixer": [
+        "coding-standards-check/php-cs-fixer": [
             "php-cs-fixer --config=.php_cs.dist fix --dry-run"
         ],
         "coding-standards-check": [
@@ -83,8 +84,8 @@
         "coding-standards-apply/php-cs-fixer": [
             "php-cs-fixer --config=.php_cs.dist fix"
         ],
-        "apply-coding-standards": [
-            "@coding-standards-apply"
+        "coding-standards-apply": [
+            "@coding-standards-apply/php-cs-fixer"
         ]
     },
     "conflict": {

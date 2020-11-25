@@ -1,4 +1,8 @@
---- vhost file="/etc/apache2/sites-enabled/test.conf" type="apache" start
-ServerName test.example.com
+<server>
+<vhost file="/etc/apache2/sites-enabled/test.conf" type="apache"><![CDATA[ServerName test.example.com
 DocumentRoot /data/www/example/htdocs/
---- vhost end
+]]></vhost>
+<vhost file="/etc/apache2/sites-enabled/foo.conf" type="apache"><![CDATA[ServerName foo.example.com
+DocumentRoot /data/www/foo/htdocs/
+]]></vhost>
+</server>

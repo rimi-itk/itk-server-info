@@ -1,6 +1,5 @@
 php:
-  '@text': |
+  version: |
     PHP
-  modules:
-    '@text': |
-      Modules
+  modules: |
+    Modules

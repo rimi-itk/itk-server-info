@@ -1,7 +1,15 @@
 vhost:
-  '@text': |
-    ServerName test.example.com
-    DocumentRoot /data/www/example/htdocs/
-  '@attributes':
-    file: '/etc/apache2/sites-enabled/test.conf'
-    type: 'apache'
+  -
+    '@attributes':
+      file: '/etc/apache2/sites-enabled/test.conf'
+      type: 'apache'
+    '@text': |
+      ServerName test.example.com
+      DocumentRoot /data/www/example/htdocs/
+  -
+    '@attributes':
+      file: '/etc/apache2/sites-enabled/foo.conf'
+      type: 'apache'
+    '@text': |
+      ServerName foo.example.com
+      DocumentRoot /data/www/foo/htdocs/

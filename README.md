@@ -9,6 +9,11 @@ composer install --no-dev --classmap-authoritative
 bin/console doctrine:migrations:migrate --no-interaction
 ```
 
+
+```sh
+bin/console app:server:process --help
+```
+
 ## Development
 
 ```sh

@@ -22,6 +22,7 @@ class DataParserTest extends TestCase
     public function testLoadData(string $data, array $expected)
     {
         $actual = $this->dataHelper->parseData($data);
+
         $this->assertEquals($expected, $actual);
     }
 
@@ -35,22 +36,78 @@ class DataParserTest extends TestCase
         ], $filenames);
     }
 
-    public function _testXml()
+    /**
+     * @dataProvider xml2ArrayProvider
+     */
+    public function testXml2Array($data, $expected)
     {
-        $xml = <<<'XML'
-<a>
-<_info>A</_info>
-<b>
-<info>B
+        $actual = $this->dataHelper->parseData($data);
 
-B
+        $this->assertEquals($expected, $actual);
+    }
 
+    public function xml2ArrayProvider()
+    {
+        yield [
+            <<<'XML'
+<server>
+<vhost file="/etc/apache2/sites-enabled/000-default.conf"><![CDATA[DocumentRoot /var/www/html
+]]></vhost>
+</server>
+XML
+            ,
+            [
+                'vhost' => [
+                    '@attributes' => [
+                        'file' => '/etc/apache2/sites-enabled/000-default.conf',
+                    ],
+                    '@text' => 'DocumentRoot /var/www/html'."\n",
+                ],
+            ],
+        ];
 
-B</info>
-</b>
-</a>
-XML;
-        $sxe = new \SimpleXMLElement($xml);
-        var_export(['json' => json_decode(json_encode($sxe), true)]);
+        yield [
+            <<<'XML'
+<server>
+<vhost file="/etc/apache2/sites-enabled/000-default.conf"><![CDATA[DocumentRoot /var/www/html
+]]></vhost>
+<vhost file="/etc/apache2/sites-enabled/000-example.conf"><![CDATA[DocumentRoot /var/www/example
+]]></vhost>
+</server>
+XML
+            ,
+            [
+                'vhost' => [
+                    [
+                        '@attributes' => [
+                            'file' => '/etc/apache2/sites-enabled/000-default.conf',
+                        ],
+                        '@text' => 'DocumentRoot /var/www/html'."\n",
+                    ],
+                    [
+                        '@attributes' => [
+                            'file' => '/etc/apache2/sites-enabled/000-example.conf',
+                        ],
+                        '@text' => 'DocumentRoot /var/www/example'."\n",
+                    ],
+                ],
+            ],
+        ];
+
+        yield [
+            <<<'XML'
+<server>
+<php>
+<version><![CDATA[PHP
+]]></version></php>
+</server>
+XML
+            ,
+            [
+                'php' => [
+                    'version' => 'PHP'."\n",
+                ],
+            ],
+        ];
     }
 }

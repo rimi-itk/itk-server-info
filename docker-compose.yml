@@ -58,15 +58,6 @@ services:
       - "traefik.docker.network=frontend"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_DOMAIN}`)"
 
-  memcached:
-    image: 'memcached:latest'
-    networks:
-      - app
-    ports:
-      - '11211'
-    environment:
-      - MEMCACHED_CACHE_SIZE=64
-
   mailhog:
     image: mailhog/mailhog
     networks:
