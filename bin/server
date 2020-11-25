@@ -102,15 +102,17 @@ if command -v php &> /dev/null; then
   end_section
 fi
 
-if command -v php &> /dev/null; then
-  start_section "composer"
+for composer in composer composer1 composer2; do
+  if command -v "$composer" &> /dev/null; then
+    start_section "$composer"
 
-  start_element "version"
-  composer --version
-  end_element
+    start_element "version"
+    "$composer" --version
+    end_element
 
-  end_section
-fi
+    end_section
+  fi
+done
 
 start_section "virtual-hosts"
 
