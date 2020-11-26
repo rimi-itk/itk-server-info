@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ServerDataProcessor;
+namespace App\DataProcessor\Server;
 
 class Apache2DataProcessor implements DataProcessorInterface
 {

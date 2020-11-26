@@ -2,10 +2,10 @@
 
 namespace App\Util;
 
+use App\DataProcessor\Server\Manager as ServerDataProcessorManager;
 use App\Entity\Server;
 use App\Exception\InvalidDataException;
 use App\Repository\ServerRepository;
-use App\ServerDataProcessor\Manager as ServerDataProcessorManager;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;

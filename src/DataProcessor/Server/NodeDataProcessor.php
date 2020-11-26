@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ServerDataProcessor;
+namespace App\DataProcessor\Server;
 
 class NodeDataProcessor implements DataProcessorInterface
 {
