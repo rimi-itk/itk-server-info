@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerTrait;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ServerHelper
 {
@@ -36,12 +37,18 @@ class ServerHelper
         $this->serverDataProcessorManager = $serverDataProcessorManager;
     }
 
-    public function process(array $serverNames)
+    public function process(array $serverNames, array $options = [])
     {
+        $resolver = new OptionsResolver();
+        $this->configureProcessOptions($resolver);
+        $options = $resolver->resolve($options);
+
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->select('s')
-            ->from(Server::class, 's')
-            ->where('s.processedAt IS NULL OR s.processedAt < s.updatedAt');
+            ->from(Server::class, 's');
+        if (!$options['force']) {
+            $queryBuilder->andWhere('s.processedAt IS NULL OR s.processedAt < s.updatedAt');
+        }
         if (!empty($serverNames)) {
             $queryBuilder->andWhere('s.name IN (:serverNames)');
             $queryBuilder->setParameter('serverNames', $serverNames);
@@ -78,5 +85,12 @@ class ServerHelper
         } catch (InvalidDataException $exception) {
             $this->error($exception->getMessage());
         }
+    }
+
+    private function configureProcessOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+            'force' => false,
+        ]);
     }
 }
