@@ -133,19 +133,6 @@ end_section
 
 start_section "sites"
 
-# # Composer
-# if command -v composer &> /dev/null; then
-#   for f in /data/www/*/htdocs/composer.json; do
-#     if [ -f "$f" ]; then
-#       document_root=$(dirname "$f")
-#       element_attributes=([document-root]="$document_root" [format]="json")
-#       start_element "composer"
-#       composer --working-dir="$document_root" show --format=json
-#       end_element
-#     fi
-#   done
-# fi
-
 # Drupal sites
 for f in /data/www/*/htdocs/*/sites/*/settings.php /data/www/*/htdocs/sites/*/settings.php; do
   if [ -f "$f" ]; then
