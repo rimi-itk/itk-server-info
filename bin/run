@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -o errexit -o errtrace -o noclobber -o nounset -o pipefail
+IFS=$'\n\t'
+
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+project_dir=$(cd "$(dirname "$script_dir")" && pwd)
+config_filename="$project_dir/.env.local"
+
+if ! command -v curl &> /dev/null; then
+  (>&2 echo "Cannot run curl")
+  exit 1
+fi
+
+if [ ! -e "$config_filename" ]; then
+  (>&2 echo "Config file $config_filename not found")
+  exit 1
+fi
+
+# shellcheck disable=SC1090
+source "$config_filename"
+
+if [ -z "${HUB_URL:-}" ]; then
+  (>&2 echo "HUB_URL not defined")
+  exit 1
+fi
+
+if [ -z "${HUB_API_PASSWORD:-}" ]; then
+  (>&2 echo "HUB_API_PASSWORD not defined")
+  exit 1
+fi
+
+data_filename=$project_dir/var/data
+log_filename=$project_dir/var/run.log
+
+"$script_dir/server" >| "$data_filename" 2>&1
+
+curl --user "api:$HUB_API_PASSWORD" --request PUT "$HUB_URL/server/$(hostname)" --data-binary "@$data_filename" --verbose >| "$log_filename" 2>&1

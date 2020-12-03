@@ -1,0 +1,208 @@
+#!/usr/bin/env bash
+# set -o errexit -o errtrace -o noclobber -o nounset -o pipefail
+set -o errtrace -o noclobber -o nounset -o pipefail
+IFS=$'\n\t'
+
+section_names=()
+declare -A section_attributes=()
+
+start_section() {
+  if [ -z "${section_names+x}" ]; then
+    section_names=("$1")
+  else
+    section_names=("$1" "${section_names[@]}")
+  fi
+
+  printf "<%s" "${section_names[0]}"
+  for name in "${!section_attributes[@]}"; do
+    printf " %s=\"%s\"" "$name" "${section_attributes[$name]}"
+  done
+  printf ">"
+  section_attributes=()
+}
+
+end_section() {
+  printf "\n</%s>\n" "${section_names[0]}"
+
+  # @see https://stackoverflow.com/a/8247497
+  section_names=("${section_names[@]:1}")
+}
+
+element_name=''
+declare -A element_attributes=()
+
+start_element() {
+  element_name=$1
+
+  printf "<%s" "$element_name"
+  for name in "${!element_attributes[@]}"; do
+    printf " %s=\"%s\"" "$name" "${element_attributes[$name]}"
+  done
+  printf "><![CDATA["
+  element_attributes=()
+}
+
+end_element() {
+  printf "]]></%s>\n" "$element_name"
+}
+
+start_section "server"
+
+if command -v nginx &> /dev/null; then
+  start_section "nginx"
+
+  start_element "version"
+  nginx -v
+  end_element
+
+  end_section
+fi
+
+if command -v apache2 &> /dev/null; then
+  start_section "apache2"
+
+  start_element "version"
+  apache2 -v
+  end_element
+
+  end_section
+fi
+
+if command -v mysql &> /dev/null; then
+  start_section "mysql"
+
+  start_element "version"
+  mysql --version
+  end_element
+
+  end_section
+fi
+
+if command -v node &> /dev/null; then
+  start_section "node"
+
+  start_element "version"
+  node -v
+  end_element
+
+  end_section
+fi
+
+if command -v php &> /dev/null; then
+  start_section "php"
+
+  start_element "version"
+  php -v
+  end_element
+
+  start_element "modules"
+  php -m
+  end_element
+
+  end_section
+fi
+
+for composer in composer composer1 composer2; do
+  if command -v "$composer" &> /dev/null; then
+    start_section "$composer"
+
+    start_element "version"
+    "$composer" --version
+    end_element
+
+    end_section
+  fi
+done
+
+start_section "virtual-hosts"
+
+for f in /etc/{apache,nginx}*/sites-enabled/*; do
+  if [ -f "$f" ]; then
+
+    element_attributes=([file]="$f")
+    start_element "vhost"
+    grep --no-messages '^[[:space:]]*\(server_name\|root\|proxy_pass\|Server\(Name\|Alias\)\|DocumentRoot\|ProxyPass\)' "$f" |
+      # https://unix.stackexchange.com/a/205854
+      awk '{$1=$1};1'
+    end_element
+
+  fi
+done
+
+end_section
+
+start_section "sites"
+
+# Drupal sites
+for f in /data/www/*/htdocs/*/sites/*/settings.php /data/www/*/htdocs/sites/*/settings.php; do
+  if [ -f "$f" ]; then
+    site_dir=$(dirname "$f")
+    project_dir=$(dirname "$(dirname "$site_dir")")
+    if ! [[ "$f" =~ htdocs/sites ]]; then
+      # We're in a sub-folder (to htdocs) and have to step out one more time.
+      project_dir=$(dirname "$project_dir")
+    fi
+
+    start_section "drupal"
+
+    drush=''
+    if [ -f "$project_dir/vendor/bin/drush" ]; then
+      drush="$project_dir/vendor/bin/drush"
+    elif command -v drush &> /dev/null; then
+      drush="drush"
+    fi
+
+    if [ -n "$drush" ]; then
+
+      element_attributes=([project-dir]="$project_dir" [format]="json")
+      start_element "drush-status"
+      "$drush" --root="$site_dir" status --format=json
+      end_element
+
+      element_attributes=([project-dir]="$project_dir" [format]="json")
+      start_element "drush-modules"
+      "$drush" --root="$site_dir" pm-list --format=json
+      end_element
+
+    fi
+
+    if [ -e "$project_dir/composer.json" ]; then
+
+      # @TODO Use the right version of composer
+      element_attributes=([project-dir]="$project_dir" [format]="json")
+      start_element "composer-show"
+      composer --working-dir="$project_dir" show --format=json
+      end_element
+
+    fi
+
+    end_section
+  fi
+done
+
+# Symfony
+for f in /data/www/*/htdocs/*/console; do
+  if [ -f "$f" ]; then
+    project_dir=$(dirname "$(dirname "$f")")
+
+    start_section "symfony"
+
+    element_attributes=([project-dir]="$project_dir")
+    start_element "version"
+    "$f" --version
+    end_element
+
+    # @TODO Use the right version of composer
+    element_attributes=([project-dir]="$project_dir" [format]="json")
+    start_element "composer-show"
+    composer --working-dir="$project_dir" show --format=json
+    end_element
+
+    end_section
+
+  fi
+done
+
+end_section
+
+end_section
