@@ -22,6 +22,13 @@ class Website
 {
     use TimestampableEntity;
 
+    public const TYPE_DRUPAL = 'drupal';
+    public const TYPE_DRUPAL_MULTISITE = 'drupal (multisite)';
+    public const TYPE_PROXY = 'proxy';
+    public const TYPE_SYMFONY = 'symfony';
+    public const TYPE_UNKNOWN = '🐼'; // Panda face
+    public const VERSION_UNKNOWN = '👻'; // Ghost
+
     /**
      * @ORM\ManyToOne(targetEntity=Server::class, inversedBy="websites")
      * @ORM\JoinColumn(referencedColumnName="name", nullable=false)
@@ -108,6 +115,11 @@ class Website
      */
     private $audiences;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $enabled;
+
     public function __construct()
     {
         $this->audiences = new ArrayCollection();
@@ -185,7 +197,7 @@ class Website
         return $this;
     }
 
-    public function getDocumentRoot(): string
+    public function getDocumentRoot(): ?string
     {
         return $this->documentRoot;
     }
@@ -291,5 +303,22 @@ class Website
         $this->siteRoot = $siteRoot;
 
         return $this;
+    }
+
+    public function getEnabled(): ?bool
+    {
+        return $this->enabled;
+    }
+
+    public function setEnabled(bool $enabled): self
+    {
+        $this->enabled = $enabled;
+
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->getDomain() ?? static::class;
     }
 }

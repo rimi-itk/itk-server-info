@@ -30,11 +30,15 @@ class ServerHelper
     /** @var ServerDataProcessorManager */
     private $serverDataProcessorManager;
 
-    public function __construct(EntityManagerInterface $entityManager, DataParser $dataHelper, ServerDataProcessorManager $serverDataProcessorManager)
+    /** @var WebsiteHelper */
+    private $websiteHelper;
+
+    public function __construct(EntityManagerInterface $entityManager, DataParser $dataHelper, ServerDataProcessorManager $serverDataProcessorManager, WebsiteHelper $websiteHelper)
     {
         $this->entityManager = $entityManager;
         $this->dataHelper = $dataHelper;
         $this->serverDataProcessorManager = $serverDataProcessorManager;
+        $this->websiteHelper = $websiteHelper;
     }
 
     public function process(array $serverNames, array $options = [])
@@ -79,9 +83,10 @@ class ServerHelper
     {
         $this->info(sprintf('Processing server %s', $server->getName()));
         try {
-            $data = $this->dataHelper->parseData($server->getRawData());
-            $serverData = $this->serverDataProcessorManager->process($data);
-            $server->setData($serverData);
+            $serverData = $this->dataHelper->parseData($server->getRawData());
+            $data = $this->serverDataProcessorManager->process($serverData);
+            $server->setData($data);
+            $this->websiteHelper->buildWebsites($server, $serverData);
         } catch (InvalidDataException $exception) {
             $this->error($exception->getMessage());
         }
