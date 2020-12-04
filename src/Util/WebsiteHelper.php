@@ -56,8 +56,7 @@ class WebsiteHelper
                         foreach ($projectsData as $projectDir => $websiteData) {
                             if (0 === strpos($data['document_root'], $projectDir)) {
                                 $website->setSiteRoot($projectDir);
-                                $data = $this->websiteDataProcessorManager->process($websiteData);
-                                $website->setData($data);
+                                $website->setData($this->websiteDataProcessorManager->process($websiteData));
                                 break;
                             }
                         }
