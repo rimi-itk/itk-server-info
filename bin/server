@@ -3,6 +3,9 @@
 set -o errtrace -o noclobber -o nounset -o pipefail
 IFS=$'\n\t'
 
+# Suppress any fancy output.
+export TERM=vt100
+
 section_names=()
 declare -A section_attributes=()
 
