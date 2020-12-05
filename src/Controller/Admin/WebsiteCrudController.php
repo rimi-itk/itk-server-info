@@ -30,7 +30,7 @@ class WebsiteCrudController extends AbstractCrudController
         return [
             TextField::new('domain'),
             AssociationField::new('server'),
-            TextField::new('documentRoot'),
+            TextField::new('siteRoot'),
             TextField::new('type'),
             TextField::new('version'),
             AssociationField::new('audiences'),
