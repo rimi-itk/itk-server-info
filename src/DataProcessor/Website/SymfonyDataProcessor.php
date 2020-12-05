@@ -4,29 +4,20 @@ namespace App\DataProcessor\Website;
 
 use App\Entity\Website;
 
-class SymfonyDataProcessor implements DataProcessorInterface
+class SymfonyDataProcessor extends AbstractDataProcessor
 {
-    public function getType(array $data): ?string
+    public function getType(array $websiteData): ?string
     {
-        return isset($serverData['symfony']) ? Website::TYPE_SYMFONY : null;
+        return isset($websiteData['symfony']) ? Website::TYPE_SYMFONY : null;
     }
 
-    public function getVersion(array $data): ?string
+    public function getVersion(array $websiteData): ?string
     {
-        if (isset($serverData['symfony']['version'])) {
-            return $serverData['symfony']['version']['@text'];
+        if (isset($websiteData['symfony']['version']['@text'])
+            && preg_match('/symfony\s+(?<version>\S+)/i', $websiteData['symfony']['version']['@text'], $matches)) {
+            return $matches['version'];
         }
 
         return null;
-    }
-
-    public function getData(array $serverData): ?array
-    {
-        $data = [];
-
-        if (isset($serverData['symfony'])) {
-        }
-
-        return $data;
     }
 }

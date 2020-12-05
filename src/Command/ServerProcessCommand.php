@@ -17,10 +17,10 @@ class ServerProcessCommand extends Command
     /** @var ServerHelper */
     private $serverHelper;
 
-    public function __construct(ServerHelper $serverHelper)
+    public function __construct(ServerHelper $dataParser)
     {
         parent::__construct();
-        $this->serverHelper = $serverHelper;
+        $this->serverHelper = $dataParser;
     }
 
     protected function configure()

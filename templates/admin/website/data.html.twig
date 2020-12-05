@@ -1,0 +1,72 @@
+{% set view = ea.crud.currentPage %}
+{% set data = field.value %}
+
+{% if view == 'index' %}
+    {{ data ? '…' : '–' }}
+
+{% elseif view == 'detail' %}
+    <div class="website-data" style="max-height: 32em; overflow: auto;">
+
+        {% if data is null %}
+
+            {{ '–' }}
+
+        {% else %}
+          {% if data['drush-modules']|default(false) %}
+            <h2>{{ 'Drupal modules'|trans }}</h2>
+
+            <table class="table table-sm table-hover">
+                <thead>
+                    <th>Package</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Version</th>
+                </thead>
+
+                {% for items in data['drush-modules'] %}
+                  <tbody>
+                    {% for item in items %}
+                      <tr>
+                        <td>{{ item.package }}</td>
+                        <td>{{ item.name|default(item.display_name|default('–')) }}</td>
+                        <td>{{ item.type|default('–') }}</td>
+                        <td>{{ item.status }}</td>
+                        <td>{{ item.version }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                {% endfor %}
+            </table>
+          {% endif %}
+
+          {% if data['composer-show']|default(false) %}
+            <h2>{{ 'Composer packages'|trans }}</h2>
+
+            <table class="table table-sm table-hover">
+              <thead>
+                <th>Name</th>
+                <th>Version</th>
+                <th>Description</th>
+              </thead>
+              {% for items in data['composer-show'] %}
+                <tbody>
+                  {% for item in items %}
+                    <tr>
+                      <td>{{ item.name }}</td>
+                      <td>{{ item.version }}</td>
+                      <td>{{ item.description }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              {% endfor %}
+            </table>
+          {% endif %}
+
+          {#{ data|json_encode(constant('JSON_PRETTY_PRINT')) }#}
+
+        {% endif %}
+
+    </div>
+
+{% endif %}

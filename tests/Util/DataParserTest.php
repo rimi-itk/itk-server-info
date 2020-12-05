@@ -30,7 +30,7 @@ class DataParserTest extends TestCase
     {
         $filenames = glob(__DIR__.'/DataParserTest/tests/*.data');
 
-        return array_map(fn ($filename) => [
+        return array_map(static fn ($filename) => [
             file_get_contents($filename),
             Yaml::parse(file_get_contents(preg_replace('/\.data$/', '.expected', $filename))),
         ], $filenames);

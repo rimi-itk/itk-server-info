@@ -35,7 +35,8 @@ class WebsiteCrudController extends AbstractCrudController
             TextField::new('version'),
             AssociationField::new('audiences'),
             TextareaField::new('comments'),
-            JsonField::new('data'),
+            JsonField::new('data')
+                ->setTemplatePath('admin/website/data.html.twig'),
             DateTimeField::new('updatedAt'),
         ];
     }

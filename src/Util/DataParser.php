@@ -2,6 +2,7 @@
 
 namespace App\Util;
 
+use JsonException;
 use SimpleXMLElement;
 
 class DataParser
@@ -9,6 +10,15 @@ class DataParser
     public function parseData(string $data): array
     {
         return $this->buildData($data);
+    }
+
+    public static function parseJson(string $json): ?array
+    {
+        try {
+            return json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            return null;
+        }
     }
 
     private function buildData(string $payload, int $level = 0): array

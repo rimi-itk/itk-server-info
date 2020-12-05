@@ -14,11 +14,11 @@ class Manager
         $this->processors = $websiteDataProcessors;
     }
 
-    public function getType(array $serverData)
+    public function getType(array $websiteData)
     {
         $processors = $this->getProcessors();
         foreach ($processors as $processor) {
-            $type = $processor->getType($serverData);
+            $type = $processor->getType($websiteData);
             if (null !== $type) {
                 return $type;
             }
@@ -27,11 +27,11 @@ class Manager
         return Website::TYPE_UNKNOWN;
     }
 
-    public function getVersion(array $serverData)
+    public function getVersion(array $websiteData)
     {
         $processors = $this->getProcessors();
         foreach ($processors as $processor) {
-            $version = $processor->getVersion($serverData);
+            $version = $processor->getVersion($websiteData);
             if (null !== $version) {
                 return $version;
             }
@@ -40,18 +40,18 @@ class Manager
         return Website::VERSION_UNKNOWN;
     }
 
-    public function process(array $serverData)
+    public function getData(array $websiteData)
     {
         $data = [];
         $processors = $this->getProcessors();
         foreach ($processors as $processor) {
-            $processedData = $processor->getData($serverData);
+            $processedData = $processor->getData($websiteData);
             if (null !== $processedData) {
-                $data = array_merge($data, $processedData);
+                $data[] = $processedData;
             }
         }
 
-        return $data;
+        return array_merge(...$data);
     }
 
     /**

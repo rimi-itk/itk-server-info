@@ -30,7 +30,7 @@ class Server
     /**
      * @ORM\Column(type="text")
      */
-    private $rawData;
+    private ?string $rawData;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)

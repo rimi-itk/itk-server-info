@@ -4,9 +4,9 @@ namespace App\DataProcessor\Website;
 
 interface DataProcessorInterface
 {
-    public function getType(array $data): ?string;
+    public function getType(array $websiteData): ?string;
 
-    public function getVersion(array $data): ?string;
+    public function getVersion(array $websiteData): ?string;
 
-    public function getData(array $data): ?array;
+    public function getData(array $websiteData): ?array;
 }

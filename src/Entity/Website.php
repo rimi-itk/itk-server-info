@@ -33,7 +33,7 @@ class Website
      * @ORM\ManyToOne(targetEntity=Server::class, inversedBy="websites")
      * @ORM\JoinColumn(referencedColumnName="name", nullable=false)
      */
-    private $server;
+    private ?Server $server;
 
     /**
      * @ORM\Id
@@ -41,41 +41,35 @@ class Website
      *
      * @Groups("read")
      */
-    private $domain;
+    private ?string $domain;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="document_root", type="string", length=255, nullable=true)
      *
      * @Groups("read")
      */
-    private $documentRoot;
+    private string $documentRoot;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="type", type="string", length=255, nullable=true)
      *
      * @Groups("read")
      */
-    private $type;
+    private string $type;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="version", type="string", length=255, nullable=true)
      *
      * @Groups("read")
      */
-    private $version;
+    private string $version;
 
     /**
      * @var string
      *
      * @ORM\Column(type="text", nullable=true)
      */
-    private $comments;
+    private ?string $comments;
 
     /**
      * @ORM\Column(type="text", nullable=true)
@@ -95,12 +89,12 @@ class Website
     /**
      * @ORM\Column(type="json")
      */
-    private $data = [];
+    private array $data = [];
 
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    private $search;
+    private ?string $search;
 
     /**
      * @ORM\ManyToMany(targetEntity=Audience::class, inversedBy="websites")
@@ -113,12 +107,17 @@ class Website
      *     }
      * )
      */
-    private $audiences;
+    private Collection $audiences;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $enabled;
+    private ?bool $enabled;
+
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $unprocessedData = [];
 
     public function __construct()
     {
@@ -320,5 +319,17 @@ class Website
     public function __toString()
     {
         return $this->getDomain() ?? static::class;
+    }
+
+    public function getUnprocessedData(): ?array
+    {
+        return $this->unprocessedData;
+    }
+
+    public function setUnprocessedData(?array $unprocessedData): self
+    {
+        $this->unprocessedData = $unprocessedData;
+
+        return $this;
     }
 }

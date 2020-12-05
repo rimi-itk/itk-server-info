@@ -49,14 +49,16 @@ class WebsiteHelper
                             ->setEnabled(true)
                             ->setDomain($domain)
                             ->setDocumentRoot($data['document_root'])
-                            ->setType(Website::TYPE_UNKNOWN)
-                            ->setVersion(Website::VERSION_UNKNOWN)
                         ;
 
                         foreach ($projectsData as $projectDir => $websiteData) {
                             if (0 === strpos($data['document_root'], $projectDir)) {
-                                $website->setSiteRoot($projectDir);
-                                $website->setData($this->websiteDataProcessorManager->process($websiteData));
+                                $website
+                                    ->setUnprocessedData($websiteData)
+                                    ->setSiteRoot($projectDir)
+                                    ->setType($this->websiteDataProcessorManager->getType($websiteData))
+                                    ->setVersion($this->websiteDataProcessorManager->getVersion($websiteData))
+                                    ->setData($this->websiteDataProcessorManager->getData($websiteData));
                                 break;
                             }
                         }
@@ -101,7 +103,7 @@ class WebsiteHelper
                 foreach ($stuff as $items) {
                     foreach ($items as $key => $item) {
                         if (isset($item['@attributes']['project-dir'])) {
-                            $data[$item['@attributes']['project-dir']][$type][$key][] = $item;
+                            $data[$item['@attributes']['project-dir']][$type][$key] = $item;
                         }
                     }
                 }
