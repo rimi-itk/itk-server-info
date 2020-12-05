@@ -19,6 +19,13 @@ class ServerCrudController extends AbstractCrudController
         return Server::class;
     }
 
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setPaginatorPageSize(100)
+            ;
+    }
+
     public function configureFields(string $pageName): iterable
     {
         return [

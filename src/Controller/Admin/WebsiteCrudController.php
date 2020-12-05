@@ -10,6 +10,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
@@ -23,6 +24,13 @@ class WebsiteCrudController extends AbstractCrudController
     public static function getEntityFqcn(): string
     {
         return Website::class;
+    }
+
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setPaginatorPageSize(100)
+            ;
     }
 
     public function configureFields(string $pageName): iterable
@@ -46,6 +54,14 @@ class WebsiteCrudController extends AbstractCrudController
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->disable(Action::NEW, Action::DELETE);
+    }
+
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $filters
+            ->add('type')
+            ->add('audiences')
+            ;
     }
 
     public function createIndexQueryBuilder(
