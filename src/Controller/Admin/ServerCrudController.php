@@ -10,6 +10,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class ServerCrudController extends AbstractCrudController
@@ -37,6 +38,7 @@ class ServerCrudController extends AbstractCrudController
             DateTimeField::new('createdAt'),
             DateTimeField::new('updatedAt'),
             DateTimeField::new('processedAt'),
+            TextareaField::new('search'),
             TextField::new('rawData')
                 ->onlyOnDetail()
                 ->setTemplatePath('admin/server/rawData.html.twig'),

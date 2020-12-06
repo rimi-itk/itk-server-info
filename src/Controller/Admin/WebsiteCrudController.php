@@ -36,16 +36,28 @@ class WebsiteCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            TextField::new('domain'),
-            AssociationField::new('server'),
-            TextField::new('siteRoot'),
-            TextField::new('type'),
-            TextField::new('version'),
-            AssociationField::new('audiences'),
+            TextField::new('domain')
+                ->hideOnForm(),
+            AssociationField::new('server')
+                ->hideOnForm(),
+            TextField::new('siteRoot')
+                ->hideOnForm(),
+            TextField::new('type')
+                ->hideOnForm()
+                ->setTemplatePath('admin/website/list/filter.html.twig'),
+            TextField::new('version')
+                ->hideOnForm()
+                ->setTemplatePath('admin/website/list/filter.html.twig'),
+            AssociationField::new('audiences')
+                ->setTemplatePath('admin/website/list/filter.html.twig'),
             TextareaField::new('comments'),
+            DateTimeField::new('updatedAt')
+                ->hideOnForm(),
             JsonField::new('data')
+                ->onlyOnDetail()
                 ->setTemplatePath('admin/website/data.html.twig'),
-            DateTimeField::new('updatedAt'),
+            TextareaField::new('search')
+                ->onlyOnDetail(),
         ];
     }
 
@@ -60,6 +72,7 @@ class WebsiteCrudController extends AbstractCrudController
     {
         return $filters
             ->add('type')
+            ->add('version')
             ->add('audiences')
             ;
     }

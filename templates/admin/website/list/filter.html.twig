@@ -1,0 +1,51 @@
+{% set view = ea.crud.currentPage %}
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+
+{% macro render_value(value, property, is_iterable, context) %}
+    {% if value %}
+			{% if context.view == 'index' %}
+        {% set filter_value = value.id|default(value.name|default(value)) %}
+        {% set current_filter_value = app.request.get('filters')[property]['value']|default(null) %}
+        {% set is_filter_applied = is_iterable ? (filter_value in current_filter_value) : (current_filter_value == filter_value) %}
+
+        {% if is_filter_applied %}
+					{% set filters = {(property): null} %}
+					{% if property == 'version' %}
+						{% set filters = filters|merge({type: null}) %}
+					{% endif %}
+          {% set filter_url = current_path({filters: filters}) %}
+
+          {{ value }}
+          <a class="action-filters-reset" href="{{ filter_url }}" title="{{ 'Remove filter by “%value%”'|trans({'%value%': value}) }}">
+            <i class="fa fa-close"></i>
+          </a>
+        {% else %}
+					{% set filters = {(property): {comparison: '=', value: is_iterable ? [filter_value] : filter_value}} %}
+					{% if property == 'version' %}
+						{% set filters = filters|merge({type: {comparison: '=', value: context.entity.instance.type}}) %}
+					{% endif %}
+          {% set filter_url = current_path({filters: filters}) %}
+
+          <a href="{{ filter_url }}" title="{{ 'Filter by “%value%”'|trans({'%value%': value}) }}">
+            {{ value }}
+            {#<i class="fa fa-filter fa-fw"></i>#}
+          </a>
+        {% endif %}
+			{% else %}
+        {{ value }}
+      {% endif %}
+    {% endif %}
+{% endmacro %}
+
+<div class="website-{{ field.property }}">
+  {% if field.value is iterable %}
+    {% for item in field.value -%}
+      {% if not loop.first %}, {% endif %}
+      {{ _self.render_value(item, field.property, true, _context) }}
+    {%- endfor %}
+  {% else %}
+    {{ _self.render_value(field.value, field.property, false, _context) }}
+  {% endif %}
+</div>
