@@ -1,0 +1,10 @@
+<server>
+<php>
+<version><![CDATA[PHP
+]]></version>
+<modules><![CDATA[Modules
+]]></modules>
+</php>
+</server>
+
+
